@@ -32,7 +32,7 @@ async function generateInterViewReportController(req, res) {
                 })
             }
 
-            const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
+            const resumeContent = await pdfParse(req.file.buffer)
             resumeText = resumeContent.text || ""
         }
 
@@ -54,14 +54,16 @@ async function generateInterViewReportController(req, res) {
             message: "Interview report generated successfully.",
             interviewReport
         })
-    } catch (error) {
-        console.log("generateInterViewReportController error:", error)
-        return res.status(500).json({
-            message: "Unable to generate interview report. Please try again."
-        })
-    }
+   } catch (error) {
+    console.error("generateInterViewReportController error:", error)
 
+    return res.status(500).json({
+        message: "Unable to generate interview report. Please try again.",
+        error: error.message || "Unknown backend error"
+    })
 }
+
+
 
 /**
  * @description Controller to get interview report by interviewId.
