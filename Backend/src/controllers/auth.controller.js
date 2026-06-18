@@ -8,6 +8,26 @@ const tokenBlacklistModel = require("../models/blacklist.model")
  * @description register a new user, expects username, email and password in the request body
  * @access Public
  */
+function getCookieOptions() {
+    const isProduction = process.env.NODE_ENV === "production"
+
+    return {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+        maxAge: 24 * 60 * 60 * 1000
+    }
+}
+
+function getClearCookieOptions() {
+    const isProduction = process.env.NODE_ENV === "production"
+
+    return {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax"
+    }
+}
 async function registerUserController(req, res) {
 
     const { username, email, password } = req.body
@@ -42,7 +62,7 @@ async function registerUserController(req, res) {
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token)
+    res.cookie("token", token, getCookieOptions())
 
 
     res.status(201).json({
@@ -88,7 +108,7 @@ async function loginUserController(req, res) {
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token)
+   res.cookie("token", token, getCookieOptions())
     res.status(200).json({
         message: "User loggedIn successfully.",
         user: {
@@ -112,7 +132,7 @@ async function logoutUserController(req, res) {
         await tokenBlacklistModel.create({ token })
     }
 
-    res.clearCookie("token")
+   res.clearCookie("token", getClearCookieOptions())
 
     res.status(200).json({
         message: "User logged out successfully"
